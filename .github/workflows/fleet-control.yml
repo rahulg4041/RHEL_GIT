@@ -26,6 +26,8 @@ jobs:
           username: ${{ secrets.VM_USER }}
           password: ${{ secrets.VM_PASSWORD }}
           script: |
-            echo "Executing action: ${{ inputs.action }}"
-            sudo systemctl ${{ inputs.action }} fleet.service
-            sudo systemctl status fleet.service --no-pager
+            echo "Executing: sudo systemctl ${{ inputs.action }} fleet.service"
+            sudo /usr/bin/systemctl ${{ inputs.action }} fleet.service
+            if [ "${{ inputs.action }}" != "status" ]; then
+              sudo /usr/bin/systemctl status fleet.service --no-pager
+            fi
