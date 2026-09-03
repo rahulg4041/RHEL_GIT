@@ -1,0 +1,31 @@
+name: Fleet Service Control
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Select action to execute'
+        required: true
+        default: 'status'
+        type: choice
+        options:
+          - start
+          - stop
+          - restart
+          - status
+
+jobs:
+  manage-service:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Execute Service Action via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          password: ${{ secrets.VM_PASSWORD }}
+          script: |
+            echo "Executing action: ${{ inputs.action }}"
+            sudo systemctl ${{ inputs.action }} fleet.service
+            sudo systemctl status fleet.service --no-pager
