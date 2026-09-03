@@ -25,10 +25,9 @@ jobs:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USER }}
           password: ${{ secrets.VM_PASSWORD }}
-          request_pty: true
           script: |
-            echo "Executing: sudo systemctl ${{ inputs.action }} fleet.service"
-            sudo /usr/bin/systemctl ${{ inputs.action }} fleet.service
+            echo "Executing: sudo /usr/bin/systemctl ${{ inputs.action }} fleet.service"
+            sudo /usr/bin/systemctl ${{ inputs.action }} fleet.service --no-pager | cat
             if [ "${{ inputs.action }}" != "status" ]; then
-              sudo /usr/bin/systemctl status fleet.service --no-pager
+              sudo /usr/bin/systemctl status fleet.service --no-pager | cat
             fi
