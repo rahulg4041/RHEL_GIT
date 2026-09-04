@@ -78,7 +78,7 @@ public class VehicleDAO {
      * Primary 4-Parameter Method (Used by Web API Controller & CLI)
      */
     public void registerNewVehicle(String make, String model, int year, String licensePlate) throws Exception {
-        String dummyVin = "VIN" + System.currentTimeMillis() + (int)(Math.random() * 100);
+        String dummyVin = "VIN" + System.currentTimeMillis() + (int) (Math.random() * 100);
         String sql = "INSERT INTO vehicles (make, model, manufacture_year, license_plate, vin, status) VALUES (?, ?, ?, ?, ?, 'AVAILABLE')";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, make);
@@ -318,3 +318,4 @@ public class VehicleDAO {
         }
         return list;
     }
+}
