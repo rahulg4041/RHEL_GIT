@@ -61,14 +61,13 @@ jobs:
           target: "/opt/fleet-management"
           overwrite: true
 
-      - name: Restart and Verify Service via SSH
+      - name: Restart Fleet Service & Health Check
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.VM_HOST }}
-          username: ${{ secrets.VM_USER }}
-          password: ${{ secrets.VM_PASSWORD }}
-          port: 22
-          script: |
-            echo "Restarting fleet.service with updated build..."
-            sudo /usr/bin/systemctl restart fleet.service
-            sudo /usr/bin/systemctl status fleet.service --no-pager
+            host: ${{ secrets.VM_HOST }}
+            username: ${{ secrets.VM_USER }}
+            password: ${{ secrets.VM_PASSWORD }}
+            script: |
+              echo "Restarting service with new build..."
+              sudo systemctl restart fleet.service
+              sudo systemctl status fleet.service --no-pager
