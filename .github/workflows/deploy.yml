@@ -1,4 +1,4 @@
-gitname: CI/CD Build and Deploy
+name: CI/CD Build and Deploy
 
 on:
   push:
@@ -41,6 +41,7 @@ jobs:
         with:
           name: app-jar
           path: .
+
       - name: List downloaded files (Debug)
         run: |
           echo "Current working directory:"
