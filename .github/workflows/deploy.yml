@@ -40,7 +40,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: app-jar
-          path: ./dist
+          path: .
 
       - name: Copy JAR to /opt/fleet-management via SCP
         uses: appleboy/scp-action@v0.1.7
