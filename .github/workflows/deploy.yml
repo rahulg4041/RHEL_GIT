@@ -1,11 +1,11 @@
-name: CD Manual Deploy to Azure VM
+name: Manual Build & Deploy to Azure VM
 
 on:
   workflow_dispatch:
 
 jobs:
   build-and-deploy:
-    name: Build and Deploy
+    name: Build, Transfer & Deploy
     runs-on: ubuntu-latest
 
     steps:
