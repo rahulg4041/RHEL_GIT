@@ -52,15 +52,6 @@ jobs:
           target: "/opt/fleet-management"
           overwrite: true
 
-      - name: Check Secret Presence (Debug)
-        run: |
-          if [ -z "${{ secrets.VM_PASSWORD }}" ]; then
-            echo "CRITICAL: VM_PASSWORD secret is EMPTY or NOT FOUND!"
-            exit 1
-          else
-            echo "SUCCESS: VM_PASSWORD secret is loaded and non-empty."
-          fi
-
       - name: Restart and Verify Service via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:

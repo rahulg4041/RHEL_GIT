@@ -318,4 +318,3 @@ public class VehicleDAO {
         }
         return list;
     }
-}
