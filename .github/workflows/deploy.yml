@@ -28,7 +28,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: app-jar
-          path: target/*.jar
+          path: target/fleet-management-0.0.1-SNAPSHOT.jar
 
   deploy:
     name: Deploy to Azure VM (CD)
@@ -42,14 +42,14 @@ jobs:
           name: app-jar
           path: ./dist
 
-      - name: Copy JAR to Azure VM via SCP
+      - name: Copy JAR to /opt/fleet-management via SCP
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USER }}
           password: ${{ secrets.VM_PASSWORD }}
-          source: "./dist/*.jar"
-          target: "/home/rahulg4041/APP"
+          source: "./dist/fleet-management-0.0.1-SNAPSHOT.jar"
+          target: "/opt/fleet-management"
           strip_components: 1
 
       - name: Restart and Verify Service via SSH
@@ -59,6 +59,6 @@ jobs:
           username: ${{ secrets.VM_USER }}
           password: ${{ secrets.VM_PASSWORD }}
           script: |
-            echo "Restarting fleet.service with new build..."
-            sudo systemctl restart fleet.service
-            sudo systemctl status fleet.service --no-pager
+            echo "Restarting fleet.service with updated build..."
+            sudo /usr/bin/systemctl restart fleet.service
+            sudo /usr/bin/systemctl status fleet.service --no-pager
