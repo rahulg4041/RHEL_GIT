@@ -30,15 +30,6 @@ jobs:
           name: app-jar
           path: target/fleet-management-0.0.1-SNAPSHOT.jar
 
-          target: "/opt/fleet-management"
-          strip_components: 1
-          overwrite: true
-
-      - name: Restart and Verify Service via SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.VM_HOST }}
-          username: ${{ secrets.VM_USER }}
   deploy:
     name: Deploy to Azure VM (CD)
     needs: build
@@ -63,20 +54,21 @@ jobs:
 
       - name: Check Secret Presence (Debug)
         run: |
-            if [ -z "${{ secrets.VM_PASSWORD }}" ]; then
-              echo "CRITICAL: VM_PASSWORD secret is EMPTY or NOT FOUND!"
-              exit 1
-            else
-              echo "SUCCESS: VM_PASSWORD secret is loaded and non-empty."
-            fi  
+          if [ -z "${{ secrets.VM_PASSWORD }}" ]; then
+            echo "CRITICAL: VM_PASSWORD secret is EMPTY or NOT FOUND!"
+            exit 1
+          else
+            echo "SUCCESS: VM_PASSWORD secret is loaded and non-empty."
+          fi
 
-      - name: Restart Fleet Service & Health Check
+      - name: Restart and Verify Service via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
-            host: ${{ secrets.VM_HOST }}
-            username: ${{ secrets.VM_USER }}
-            password: ${{ secrets.VM_PASSWORD }}
-            script: |
-              echo "Restarting service with new build..."
-              sudo systemctl restart fleet.service
-              sudo systemctl status fleet.service --no-pager
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          password: ${{ secrets.VM_PASSWORD }}
+          port: 22
+          script: |
+            echo "Restarting fleet.service with updated build..."
+            sudo /usr/bin/systemctl restart fleet.service
+            sudo /usr/bin/systemctl status fleet.service --no-pager
