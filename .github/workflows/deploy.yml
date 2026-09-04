@@ -1,0 +1,62 @@
+name: Build and Deploy Fleet App
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build & Test (CI)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Set up Java JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build and Test with Maven
+        run: mvn clean package -DskipTests=false
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-jar
+          path: target/*.jar
+
+  deploy:
+    name: Deploy to Azure VM (CD)
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Build Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: app-jar
+          path: ./dist
+
+      - name: Copy JAR to Azure VM via SCP
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          password: ${{ secrets.VM_PASSWORD }}
+          source: "./dist/*.jar"
+          target: "/home/rahulg4041/APP"
+          strip_components: 1
+
+      - name: Restart Fleet Service & Health Check
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          password: ${{ secrets.VM_PASSWORD }}
+          script: |
+            echo "Restarting service with new build..."
+            sudo systemctl restart fleet.service
+            sudo systemctl status fleet.service --no-pager
