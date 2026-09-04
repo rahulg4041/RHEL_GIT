@@ -30,6 +30,6 @@ public class ServiceCenterDAO {
                 }
             }
         }
-        throw new Exception("❌ Failed to retrieve ID for service center.");
+        throw new Exception("❌ Failed to retrieve ID for service center...");
     }
 }
