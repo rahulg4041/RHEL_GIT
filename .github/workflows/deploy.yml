@@ -67,6 +67,7 @@ jobs:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USER }}
           password: ${{ secrets.VM_PASSWORD }}
+          port: 22
           script: |
             echo "Restarting fleet.service with updated build..."
             sudo /usr/bin/systemctl restart fleet.service
