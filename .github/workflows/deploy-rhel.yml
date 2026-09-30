@@ -28,15 +28,12 @@ jobs:
 
       - name: Restart Fleet App Container
         run: |
-          # Gracefully stop existing container with a 10s timeout
           podman stop -t 10 fleet-app || true
           podman rm -f fleet-app || true
-          
-          # Allow kernel network stack to fully release port 8080
           sleep 2
 
-          # Run the updated container
-          podman run -d \
+          # Unset the tracking ID so the GitHub runner does not kill the container on exit
+          env RUNNER_TRACKING_ID="" podman run -d \
             --name fleet-app \
             -p 8080:8080 \
             -e SPRING_DATASOURCE_URL="jdbc:mysql://host.containers.internal:3306/fleet_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC" \
@@ -51,9 +48,6 @@ jobs:
 
       - name: Verify Container Startup
         run: |
-          # Wait for Spring Boot context initialization
-          sleep 10
+          sleep 12
           podman ps --filter "name=fleet-app"
-          podman logs --tail 20 fleet-app
-          sleep 5
-          podman ps --filter "name=fleet-app"
+          podman logs --tail 25 fleet-app
