@@ -1,0 +1,72 @@
+name: Manage Fleet App on RHEL
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Choose action to perform on fleet-app'
+        required: true
+        default: 'status'
+        type: choice
+        options:
+          - 'status'
+          - 'start'
+          - 'stop'
+          - 'restart'
+          - 'view-logs'
+      log_lines:
+        description: 'Number of log lines to display (for view-logs or after action)'
+        required: false
+        default: '50'
+        type: string
+
+jobs:
+  manage:
+    runs-on: self-hosted
+
+    steps:
+      - name: Perform Container Action
+        run: |
+          ACTION="${{ github.event.inputs.action }}"
+          LINES="${{ github.event.inputs.log_lines }}"
+
+          echo "=========================================="
+          echo "Executing action: $ACTION"
+          echo "=========================================="
+
+          case "$ACTION" in
+            start)
+              echo "Starting fleet-app container..."
+              env RUNNER_TRACKING_ID="" podman start fleet-app
+              sleep 3
+              ;;
+            stop)
+              echo "Stopping fleet-app container..."
+              podman stop -t 10 fleet-app
+              ;;
+            restart)
+              echo "Restarting fleet-app container..."
+              env RUNNER_TRACKING_ID="" podman restart -t 10 fleet-app
+              sleep 5
+              ;;
+            status)
+              echo "Checking container state..."
+              ;;
+            view-logs)
+              echo "Fetching latest $LINES lines of container logs..."
+              podman logs --tail "$LINES" fleet-app
+              exit 0
+              ;;
+            *)
+              echo "Unknown action: $ACTION"
+              exit 1
+              ;;
+          esac
+
+          echo ""
+          echo "--- Current Container Status ---"
+          podman ps -a --filter "name=fleet-app"
+
+          echo ""
+          echo "--- Recent Application Logs ($LINES lines) ---"
+          podman logs --tail "$LINES" fleet-app
