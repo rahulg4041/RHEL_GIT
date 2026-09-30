@@ -1,0 +1,54 @@
+name: Build and Deploy Fleet App on RHEL
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'maven'
+
+      - name: Build with Maven
+        run: mvn clean package -DskipTests
+
+      - name: Build Podman Image
+        run: |
+          podman build -t fleet-app:latest .
+
+      - name: Restart Fleet App Container
+        run: |
+          # Stop and remove existing container if running
+          podman stop fleet-app || true
+          podman rm fleet-app || true
+
+          # Launch the updated container
+          podman run -d \
+            --name fleet-app \
+            -p 8080:8080 \
+            -e SPRING_DATASOURCE_URL="jdbc:mysql://host.containers.internal:3306/fleet_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC" \
+            -e SPRING_DATASOURCE_USERNAME="fleet_user" \
+            -e SPRING_DATASOURCE_PASSWORD="UserPassword123!" \
+            -e SPRING_DATASOURCE_DRIVER_CLASS_NAME="com.mysql.cj.jdbc.Driver" \
+            -e FLEET_DB_URL="jdbc:mysql://host.containers.internal:3306/fleet_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC" \
+            -e FLEET_DB_USER="fleet_user" \
+            -e FLEET_DB_PASSWORD="UserPassword123!" \
+            --restart unless-stopped \
+            fleet-app:latest
+
+      - name: Verify Health
+        run: |
+          sleep 5
+          podman ps --filter "name=fleet-app"
