@@ -1,9 +1,7 @@
 name: Build and Deploy Fleet App on RHEL
 
+# Only allow manual trigger via GitHub button
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
 
 jobs:
@@ -30,11 +28,8 @@ jobs:
 
       - name: Restart Fleet App Container
         run: |
-          # Stop and remove existing container if running
           podman stop fleet-app || true
           podman rm fleet-app || true
-
-          # Launch the updated container
           podman run -d \
             --name fleet-app \
             -p 8080:8080 \
